@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import GameBoard from '@/components/GameBoard';
 import ScoreBoard from '@/components/ScoreBoard';
 import ControlPanel from '@/components/ControlPanel';
-import { GameState } from '@/types/game';
+import { GameState, Player } from '@/types/game';
+import { calculateWinner, isDraw, createInitialBoard } from '@/lib/gameUtils';
 
 export default function Home() {
-  // Mock state for UI development
-  const [gameState] = useState<GameState>({
-    board: Array(9).fill(null),
+  const [gameState, setGameState] = useState<GameState>({
+    board: createInitialBoard(),
     isXNext: true,
     winner: null,
+    winningLine: null,
     scores: {
       X: 0,
       O: 0,
@@ -20,9 +21,57 @@ export default function Home() {
     },
   });
 
-  const handleSquareClick = () => {};
+  const handleSquareClick = useCallback((index: number) => {
+    setGameState((prev) => {
+      if (prev.board[index] || prev.winner) return prev;
 
-  const handleRestart = () => {};
+      const currentPlayer: Player = prev.isXNext ? 'X' : 'O';
+      const newBoard = [...prev.board];
+      newBoard[index] = currentPlayer;
+
+      const { winner, line } = calculateWinner(newBoard);
+      const draw = isDraw(newBoard, !!winner);
+
+      if (winner) {
+        return {
+          ...prev,
+          board: newBoard,
+          winner,
+          winningLine: line,
+          scores: {
+            ...prev.scores,
+            [winner]: prev.scores[winner] + 1,
+          },
+        };
+      } else if (draw) {
+        return {
+          ...prev,
+          board: newBoard,
+          winner: 'Draw' as const,
+          scores: {
+            ...prev.scores,
+            Draws: prev.scores.Draws + 1,
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          board: newBoard,
+          isXNext: !prev.isXNext,
+        };
+      }
+    });
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    setGameState((prev) => ({
+      ...prev,
+      board: createInitialBoard(),
+      isXNext: true, // X always starts or we could alternate
+      winner: null,
+      winningLine: null,
+    }));
+  }, []);
 
   const statusMessage = gameState.winner 
     ? gameState.winner === 'Draw' ? "It's a Draw!" : `Winner: ${gameState.winner}`
@@ -41,7 +90,8 @@ export default function Home() {
         <GameBoard 
           board={gameState.board} 
           onSquareClick={handleSquareClick}
-          winningLine={null}
+          winningLine={gameState.winningLine}
+          disabled={!!gameState.winner}
         />
         
         <ControlPanel 

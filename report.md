@@ -50,3 +50,48 @@ All issues resolved:
 npm run lint
 npm run build
 ```
+
+---
+
+# Development Report - Phase: Game Logic + State Management
+
+## Files Changed/Added
+- `src/lib/gameUtils.ts`: Added pure utility functions for `calculateWinner`, `isDraw`, and board initialization.
+- `src/types/game.ts`: Updated `GameState` to include `winningLine`.
+- `src/app/page.tsx`: Implemented core game logic using React hooks and game utilities.
+
+## Logic Added
+- **Turn Switching**: Alternates between player 'X' and 'O'.
+- **Winner Detection**: Checks all 8 possible winning lines after each move.
+- **Draw Detection**: Identifies a draw when the board is full and no winner is found.
+- **Score Tracking**: Persistently tracks wins for X, O, and total Draws across sessions.
+- **Move Validation**: Prevents moves on already occupied squares or after the game has ended.
+- **Game Restart**: Resets the board and winner state while preserving scores.
+
+## Architecture Updates
+- **Logic Separation**: Pure game rules are isolated in `src/lib/gameUtils.ts`, decoupled from the React lifecycle.
+- **State Management**: Used `useState` and `useCallback` to manage game state efficiently, minimizing unnecessary re-renders.
+- **Data Flow**: One-way data flow from `Home` component to presentational components via props.
+
+## Verification Checklist
+- [x] React hooks only (`useState`, `useCallback`).
+- [x] Pure utility functions in `src/lib`.
+- [x] Strict typing for all logic and state.
+- [x] Move validation (no double clicks, no moves after game over).
+- [x] Winner detection (highlights winning line).
+- [x] Draw detection correctly identifies ties.
+- [x] Score tracking increments correctly.
+- [x] Build and lint pass without issues.
+
+## Remaining Issues
+- **AI Integration**: AI is currently controlled by a second local player (next phase).
+- **Animations**: Subtle animations for moves and winning states are planned for the polish phase.
+
+---
+
+## Review Fix Applied
+- ✅ Fixed stale closure issue: converted `handleSquareClick` to use functional setState pattern with empty dependencies
+- ✅ Lint passes
+- ✅ Build passes
+
+**Phase 1 & 2 Complete — Good to advance to AI Phase**

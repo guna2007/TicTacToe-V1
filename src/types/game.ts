@@ -5,6 +5,7 @@ export interface GameState {
   board: SquareValue[];
   isXNext: boolean;
   winner: Player | 'Draw' | null;
+  winningLine: number[] | null;
   scores: {
     X: number;
     O: number;
